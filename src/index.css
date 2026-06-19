@@ -1,0 +1,203 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #ff6600;
+  --color-primary-foreground: #ffffff;
+  --color-background: #1a1a1c;
+  --color-foreground: #e0e0e0;
+  --color-muted: #242426;
+  --color-muted-foreground: #8a8a8e;
+  --color-border: #2e2e32;
+  --color-card: #1e1e20;
+  --color-card-foreground: #d0d0d4;
+
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --animate-fade-in: fade-in 0.6s ease-out both;
+  --animate-slide-up: slide-up 0.6s ease-out both;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────── */
+
+@layer base {
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    background-color: #1a1a1c;
+    color: #e0e0e0;
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Accessible focus ring */
+  :focus-visible {
+    outline: 2px solid #ff6600;
+    outline-offset: 2px;
+  }
+
+  /* Respect reduced-motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Selection color */
+  ::selection {
+    background-color: #ff6600;
+    color: #fff;
+  }
+
+  /* Skip to main content link (a11y) */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    z-index: 100;
+    padding: 0.75rem 1.5rem;
+    background: #ff6600;
+    color: #fff;
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-decoration: none;
+  }
+
+  .skip-link:focus {
+    top: 0;
+  }
+
+  /* Smooth scrollbar for Webkit */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #3a3a3e;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+  }
+}
+
+/* ── Keyframes ────────────────────────────────────────────────────────── */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Preloader ────────────────────────────────────────────────────────── */
+
+.preloader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: #151518;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 1s ease, transform 1s ease;
+  pointer-events: auto;
+}
+
+.preloader-overlay.hide-preloader {
+  opacity: 0;
+  transform: scale(1.05);
+  pointer-events: none;
+}
+
+.preloader-svg {
+  width: 100%;
+  max-width: 900px;
+  height: auto;
+}
+
+.svg-draw {
+  fill: transparent;
+  stroke: #ff6600;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 8px #ff6600);
+  stroke-dasharray: var(--path-length);
+  stroke-dashoffset: var(--path-length);
+  animation: drawLines 2.5s ease-in-out forwards;
+}
+
+@keyframes drawLines {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.preloader-text {
+  position: absolute;
+  bottom: 25%;
+  color: #aaaaaa;
+  font-family: 'Inter', sans-serif, monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: fadeTextIn 1s ease forwards;
+  animation-delay: 2.5s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fadeTextIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Section Alternating Backgrounds ─────────────────────────────────── */
+
+.section-alt {
+  background-color: #161618;
+}

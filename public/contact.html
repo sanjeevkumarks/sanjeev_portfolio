@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Get In Touch Particle Effect</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #1a1a1c; /* dark charcoal */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Inter', sans-serif;
+  }
+  canvas {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="particleCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d', { willReadFrequently: true });
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+
+// Mouse interaction
+let mouse = { x: null, y: null, radius: 120 };
+window.addEventListener('mousemove', function(event) {
+  mouse.x = event.x;
+  mouse.y = event.y;
+});
+window.addEventListener('mouseout', function() {
+  mouse.x = null;
+  mouse.y = null;
+});
+window.addEventListener('resize', function() {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  init();
+});
+
+// Particle class
+let particleArray = [];
+
+class Particle {
+  constructor(x, y, color) {
+    // Add a little scatter to initial position
+    this.x = x + (Math.random() - 0.5) * 20;
+    this.y = y + (Math.random() - 0.5) * 20;
+    this.baseX = x;
+    this.baseY = y;
+    this.size = Math.random() * 2 + 1; // Size between 1 and 3
+    this.color = color;
+    this.vx = (Math.random() - 0.5) * 2;
+    this.vy = (Math.random() - 0.5) * 2;
+  }
+  
+  draw() {
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.fill();
+  }
+  
+  update() {
+    // 1. Mouse Repulsion
+    let dx = mouse.x - this.x;
+    let dy = mouse.y - this.y;
+    let distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (mouse.x != null && distance < mouse.radius) {
+      let forceDirectionX = dx / distance;
+      let forceDirectionY = dy / distance;
+      let force = (mouse.radius - distance) / mouse.radius;
+      
+      // Repel outward and add upward bias (anti-gravity)
+      let directionX = (forceDirectionX * -1);
+      let directionY = (forceDirectionY * -1) - 0.3; // Upward drift
+      
+      // Zero-friction means we just add massive momentum
+      this.vx += directionX * force * 3;
+      this.vy += directionY * force * 3;
+    }
+    
+    // 2. Slow Gravitational Pull back to base
+    let baseDx = this.baseX - this.x;
+    let baseDy = this.baseY - this.y;
+    let baseDistance = Math.sqrt(baseDx * baseDx + baseDy * baseDy);
+    
+    // Very weak spring to simulate floating in zero gravity before pulling back
+    let pullStrength = 0.002; 
+    this.vx += baseDx * pullStrength;
+    this.vy += baseDy * pullStrength;
+    
+    // 3. Apply velocity
+    this.x += this.vx;
+    this.y += this.vy;
+    
+    // 4. Inertia / Dampening (High inertia to feel floaty)
+    this.vx *= 0.94;
+    this.vy *= 0.94;
+  }
+}
+
+function init() {
+  particleArray = [];
+  
+  // Render text off-screen first to grab pixel data
+  ctx.fillStyle = 'white';
+  // Use a bold, modern font. Fallback to sans-serif
+  ctx.font = 'bold 100px "Inter", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  let text1 = "GET IN";
+  let text2 = "TOUCH";
+  
+  // Draw the text
+  ctx.fillText(text1, width/2, height/2 - 60);
+  ctx.fillText(text2, width/2, height/2 + 60);
+  
+  const textCoordinates = ctx.getImageData(0, 0, width, height);
+  
+  // Clear the text after reading
+  ctx.clearRect(0, 0, width, height);
+  
+  // Scan image data and create particles
+  // Sampling every 4th pixel for performance and a cool dotted look
+  for (let y = 0, y2 = textCoordinates.height; y < y2; y += 4) {
+    for (let x = 0, x2 = textCoordinates.width; x < x2; x += 4) {
+      // Check the alpha channel for opacity
+      if (textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4) + 3] > 128) {
+        // Top text is white, bottom text is orange
+        let color = y < height/2 ? '#ffffff' : '#ff6600';
+        particleArray.push(new Particle(x, y, color));
+      }
+    }
+  }
+}
+
+function animate() {
+  // Clear screen completely (no trailing to maintain sharp particles)
+  ctx.clearRect(0, 0, width, height);
+  
+  for (let i = 0; i < particleArray.length; i++) {
+    particleArray[i].update();
+    particleArray[i].draw();
+  }
+  requestAnimationFrame(animate);
+}
+
+// Start the sequence
+// Give custom fonts 100ms to load before mapping pixel data
+setTimeout(() => {
+  init();
+  animate();
+}, 200);
+
+</script>
+</body>
+</html>
