@@ -178,6 +178,9 @@ const DEFAULT_DATA: PortfolioData = {
 };
 
 // --- Context Definition ---
+import { db } from '../firebase';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+
 interface PortfolioContextType {
   data: PortfolioData;
   updateData: (section: keyof PortfolioData, newData: any) => void;
@@ -188,39 +191,68 @@ interface PortfolioContextType {
 const PortfolioContext = createContext<PortfolioContextType | undefined>(undefined);
 
 export function PortfolioProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<PortfolioData>(() => {
-    try {
-      const stored = localStorage.getItem('portfolio_master_data');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        // Ensure missing fields are populated from default
-        return { ...DEFAULT_DATA, ...parsed };
-      }
-    } catch (e) {
-      console.error('Failed to parse portfolio data', e);
-    }
-    return DEFAULT_DATA;
-  });
+  const [data, setData] = useState<PortfolioData>(DEFAULT_DATA);
 
   useEffect(() => {
+    // Listen to real-time updates from Firestore
+    const docRef = doc(db, 'portfolio', 'master');
+    const unsubscribe = onSnapshot(docRef, (docSnap: any) => {
+      if (docSnap.exists()) {
+        setData({ ...DEFAULT_DATA, ...(docSnap.data() as PortfolioData) });
+      } else {
+        // If document doesn't exist, seed it with DEFAULT_DATA
+        setDoc(docRef, DEFAULT_DATA);
+      }
+    }, (error: any) => {
+      console.error('Error fetching data from Firestore:', error);
+      // Fallback to localStorage if network fails
+      const stored = localStorage.getItem('portfolio_master_data');
+      if (stored) {
+        setData({ ...DEFAULT_DATA, ...JSON.parse(stored) });
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    // Keep local storage backup in case they go offline
     localStorage.setItem('portfolio_master_data', JSON.stringify(data));
   }, [data]);
 
-  const updateData = (section: keyof PortfolioData, newData: any) => {
+  const updateData = async (section: keyof PortfolioData, newData: any) => {
+    // Optimistic UI update
     setData(prev => ({ ...prev, [section]: newData }));
+    
+    // Sync to Firestore
+    try {
+      const docRef = doc(db, 'portfolio', 'master');
+      await setDoc(docRef, { [section]: newData }, { merge: true });
+    } catch (e) {
+      console.error('Failed to save to Firestore:', e);
+      alert('Failed to save changes online. You may need to check Firestore rules.');
+    }
   };
 
   const exportData = () => {
     return JSON.stringify(data, null, 2);
   };
 
-  const importData = (json: string) => {
+  const importData = async (json: string) => {
     try {
       const parsed = JSON.parse(json);
-      setData({ ...DEFAULT_DATA, ...parsed });
-      alert('Data imported successfully!');
+      const merged = { ...DEFAULT_DATA, ...parsed };
+      
+      // Optimistic update
+      setData(merged);
+      
+      // Sync whole object to Firestore
+      const docRef = doc(db, 'portfolio', 'master');
+      await setDoc(docRef, merged);
+      
+      alert('Data imported successfully and synced globally!');
     } catch (e) {
-      alert('Invalid JSON format.');
+      alert('Invalid JSON format or network error.');
       console.error(e);
     }
   };
