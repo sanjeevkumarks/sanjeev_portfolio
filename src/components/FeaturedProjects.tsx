@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { ExternalLink, ArrowUpRight } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 
 function GithubIcon({ className }: { className?: string }) {
   return (
@@ -164,48 +164,6 @@ const SCOPED_CSS = `
   }
 }
 `;
-
-/* ─── Project Data ──────────────────────────────────────────────────── */
-const CARDS = [
-  {
-    title: 'Project Alpha',
-    tech: 'React • TypeScript • Node.js',
-    desc: 'A full-stack web application that streamlines project management with real-time collaboration features, role-based access control, and an intuitive Kanban board interface.',
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1000&h=450&fit=crop',
-    github: 'https://github.com',
-    demo: 'https://example.com'
-  },
-  {
-    title: 'Project Beta',
-    tech: 'Python • FastAPI • PyTorch',
-    desc: 'An AI-powered document analysis platform that extracts insights from unstructured text using natural language processing and presents findings through interactive visualizations.',
-    image: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=1000&h=450&fit=crop',
-    github: 'https://github.com',
-    demo: 'https://example.com'
-  },
-  {
-    title: 'Project Gamma',
-    tech: 'Go • Kubernetes • AWS',
-    desc: 'A cloud-native microservices architecture for an e-commerce platform featuring event-driven communication, distributed caching, and automated CI/CD pipelines.',
-    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1000&h=450&fit=crop',
-    github: 'https://github.com'
-  },
-  {
-    title: 'Project Delta',
-    tech: 'Rust • WebAssembly • WebGL',
-    desc: 'A high-performance in-browser 3D rendering engine built with Rust and compiled to WebAssembly, capable of handling millions of polygons at 60fps.',
-    image: 'https://images.unsplash.com/photo-1618477247222-ac60c6218780?w=1000&h=450&fit=crop',
-    github: 'https://github.com',
-    demo: 'https://example.com'
-  },
-  {
-    title: 'Project Epsilon',
-    tech: 'Vue 3 • Firebase • Tailwind',
-    desc: 'A real-time collaborative whiteboarding tool designed for remote teams, featuring vector drawing, voice chat integration, and infinite canvas support.',
-    image: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=1000&h=450&fit=crop',
-    github: 'https://github.com'
-  }
-];
 
 /* ─── Component ─────────────────────────────────────────────────────── */
 import { usePortfolio } from '../contexts/PortfolioContext';
