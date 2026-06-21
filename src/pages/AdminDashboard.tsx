@@ -23,8 +23,9 @@ export function AdminDashboard() {
           <form 
             onSubmit={(e) => {
               e.preventDefault();
-              if (password === 'admin123') setIsAuthenticated(true);
-              else alert('Incorrect password. Try admin123');
+              const expectedPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
+              if (password === expectedPassword) setIsAuthenticated(true);
+              else alert('Incorrect password.');
             }}
             className="flex flex-col gap-4"
           >
